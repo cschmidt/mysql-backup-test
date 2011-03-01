@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+NUM_RECORDS=100000
+BACKUP_AT=50000
+BACKUP_CMD="echo 'do backup'"
+MYSQL='mysql -u backup_test backup_test -e'
+
+def exec_sql(sql)
+  `#{MYSQL} "#{sql}"`
+end
+
+exec_sql "select count(*) from stuff"
+
+0.upto(NUM_RECORDS).each do |record_num| 
+  exec_sql "INSERT INTO stuff(description) VALUES('stuff #{record_num}');"
+  if record_num == BACKUP_AT then
+    `ec2-create-snapshot --region us-west-1 -d "Test snapshot" vol-7071bf1d`
+  end
+end
